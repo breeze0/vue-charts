@@ -29,11 +29,12 @@
 			return {
 				dataArray:[	{x:"周一",y:"3"},
 							{x:"周二",y:"12"},
-							{x:"周三",y:"64"},
-							{x:"周四",y:"40"},
-							{x:"周五",y:"49"},
-							{x:"周六",y:"23"},
-							{x:"周日",y:"50"}
+							{x:"周三",y:"70"},
+							{x:"周四",y:"80"},
+							{x:"周五",y:"40"},
+							{x:"周六",y:"20"},
+							{x:"周日",y:"50"},
+							{x:"周末",y:"30"}
 						],
 				cv:null,
 				canvasInstance:null,
@@ -74,8 +75,10 @@
 				this.canvasInstance.lineTo(this.yArrow_x + this.arrowWidth,this.yArrow_y + this.arrowWidth);
 				this.canvasInstance.strokeStyle = "#000";
 				this.canvasInstance.stroke();
-				//this.canvasInstance.beginPath();
-				this.getBgline();
+				this.canvasInstance.beginPath();
+				this.getBglineY();
+				this.canvasInstance.beginPath();
+				this.getBglineX();
 				//绘制X轴数据
 				this.getXaxis();
 				this.x0 = this.padding;//重置x0
@@ -131,13 +134,23 @@
 					this.canvasInstance.fill();
 				}
 			},
-			getBgline: function() {
+			getBglineY: function() {
 				this.canvasInstance.lineWidth = 1;
 				this.canvasInstance.strokeStyle = "#e8e8e8";
-				for (var i=0;i<this.ycount/10;i++) {
+				for (var i=1;i<this.ycount/10;i++) {
 					var y =this.padding + this.arrowWidth +  (this.ycount/10-i)*10*this.Pixel;
 					this.canvasInstance.moveTo(this.x0,y);
 					this.canvasInstance.lineTo(this.xArrow_x,y);
+					this.canvasInstance.stroke();
+				}
+			},
+			getBglineX: function() {
+				this.canvasInstance.lineWidth = 1;
+				this.canvasInstance.strokeStyle = "#e8e8e8";
+				for (var i=1;i<this.dataArray.length+1;i++) {
+					var x = this.padding + this.pointWidth * i;
+					this.canvasInstance.moveTo(x,this.y0);
+					this.canvasInstance.lineTo(x,this.yArrow_y);
 					this.canvasInstance.stroke();
 				}
 			}

@@ -1,8 +1,8 @@
 <template>
 	<div id="chart">
-		<canvas id="myCanvas" width="600" height="400" style="border:1px solid #000;">
+		<canvas id="myCanvas" width="600" height="400" style="border:1px solid #000;"
+			v-on:mousemove="pointHover">
 		</canvas>
-		<button @click="getBrokenLine(dataArray)">绘制折线图</button>
 	</div>
 </template>
 
@@ -23,6 +23,7 @@
 			this.maxNum = this.getMaxdataNum(this.dataArray);
 			this.ycount = this.getYPixel(this.maxNum,this.yLength).ycount;
 			this.Pixel = this.getYPixel(this.maxNum,this.yLength).pixel;
+			this.getBrokenLine(this.dataArray);
 		},
 
 		data() {
@@ -33,8 +34,7 @@
 							{x:"周四",y:"80"},
 							{x:"周五",y:"40"},
 							{x:"周六",y:"20"},
-							{x:"周日",y:"50"},
-							{x:"周末",y:"30"}
+							{x:"周日",y:"40"}
 						],
 				cv:null,
 				canvasInstance:null,
@@ -129,8 +129,11 @@
 				for (var i = 0;i < this.dataArray.length;i++) {
 					var x = this.padding + (i + 1)*this.pointWidth;
 					var y = this.getCoordY(this.Pixel,this.dataArray[i].y);
-					this.canvasInstance.moveTo(x,y);
-					this.canvasInstance.arc(x,y,3,0,Math.PI*2);
+					this.canvasInstance.beginPath();
+					this.canvasInstance.fillStyle="blue";
+					this.canvasInstance.strokeStyle="#fff"
+					this.canvasInstance.arc(x,y,4,0,Math.PI*2);
+					this.canvasInstance.stroke();
 					this.canvasInstance.fill();
 				}
 			},
@@ -153,6 +156,39 @@
 					this.canvasInstance.lineTo(x,this.yArrow_y);
 					this.canvasInstance.stroke();
 				}
+			},
+			pointHover: function(event) {
+				var mousePos = this.getMousePos(event);
+				var pagex = mousePos.x;
+				var pagey = mousePos.y;
+				for(var i=0;i<this.dataArray.length;i++) {
+					var x = this.padding + (i + 1)*this.pointWidth;
+					var y = this.getCoordY(this.Pixel,this.dataArray[i].y);
+					if(pagex > x-4 && pagex <x+4 && pagey >y-4 && pagey <y+4) {
+						//this.canvasInstance.fillText(this.dataArray[i].)
+						this.canvasInstance.beginPath();
+						this.canvasInstance.fillStyle="red";
+						this.canvasInstance.strokeStyle="#e8e8e8"
+						this.canvasInstance.arc(x,y,4,0,Math.PI*2);
+						this.canvasInstance.stroke();
+						this.canvasInstance.fill();
+					}
+					else {
+						this.canvasInstance.beginPath();
+						this.canvasInstance.fillStyle = "blue";
+						this.canvasInstance.strokeStyle="#fff"
+						this.canvasInstance.arc(x,y,4,0,Math.PI*2);
+						this.canvasInstance.stroke();
+						this.canvasInstance.fill();
+					}
+				}
+			},
+			getMousePos: function(event) {
+				var rect = this.cv.getBoundingClientRect();
+				return {   
+			        x: event.clientX - rect.left * (this.cv.width / rect.width),  
+			        y: event.clientY - rect.top * (this.cv.height / rect.height)  
+			    }   
 			}
 	 	}
 	}

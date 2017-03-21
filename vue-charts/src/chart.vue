@@ -20,20 +20,22 @@
 			this.xLength = this.cv.width - 2*this.padding - this.arrowWidth;//x轴length
 			this.yLength = this.cv.height - 2*this.padding - this.arrowWidth;//y轴length
 			this.pointWidth = this.xLength/(this.dataArray.length + 1);//x轴每点间距
-			this.maxNum = this.getMaxdataNum(this.dataArray);
-			this.ycount = this.getYPixel(this.maxNum,this.yLength).ycount;
-			this.Pixel = this.getYPixel(this.maxNum,this.yLength).pixel;
+			this.maxNum = this.getMaxdataNum();
+			this.minNum = this.getMindataNum();
+			this.space = this.round((this.maxNum-this.minNum)/5,-1);
+			this.ycount = this.dataProcess().ycount;
+			this.Pixel = this.dataProcess().pixel;
 			this.getBrokenLine();
 		},
 		data() {
 			return {
-				dataArray:[	{x:"周一",y:"3"},
-							{x:"周二",y:"12"},
-							{x:"周三",y:"42"},
-							{x:"周四",y:"62"},
-							{x:"周五",y:"22"},
-							{x:"周六",y:"12"},
-							{x:"周日",y:"72"}	
+				dataArray:[	{x:"周一",y:"133"},
+							{x:"周二",y:"434"},
+							{x:"周三",y:"222"},
+							{x:"周四",y:"332"},
+							{x:"周五",y:"542"},
+							{x:"周六",y:"252"},
+							{x:"周日",y:"112"}	
 						],
 				cv:null,
 				canvasInstance:null,
@@ -50,8 +52,10 @@
 				pointWidth: 0,
 				dataNum:[],
 				maxNum: 0,
+				minNum:0,
 				ycount: 0,
-				Pixel: 0
+				Pixel: 0,
+				space:0
 
 			}
 		},
@@ -90,17 +94,20 @@
 				this.canvasInstance.beginPath();
 				for (var i = 0;i < this.dataArray.length; i++ ) {
 					var pointX = this.padding + (i + 1)*this.pointWidth;
-					var pointY = this.getCoordY(this.Pixel,this.dataArray[i].y)
+					var pointY = this.getCoordY(this.Pixel,this.dataArray[i].y);
 					this.canvasInstance.lineTo(pointX,pointY); 
 				}
 				this.canvasInstance.strokeStyle='red';
 				this.canvasInstance.stroke();
 			},
-			getMaxdataNum: function(dataArray) {
+			getMaxdataNum: function() {
 				for (var i = 0;i < this.dataArray.length;i++) {
 					this.dataNum.push(this.dataArray[i].y);
 				}
 				return Math.max.apply(null,this.dataNum);
+			},
+			getMindataNum: function() {
+				return Math.min.apply(null,this.dataNum);
 			},
 			getXaxis: function() {
 				for (var i = 0;i < this.dataArray.length ;i++) {
@@ -114,15 +121,11 @@
 					this.canvasInstance.textAlign = "right";//内容靠右
 					this.canvasInstance.textBaseline = "middle";//调整文字中心线
 					this.canvasInstance.fillStyle = "#000";
-					this.canvasInstance.fillText(i * 10 ,this.padding,this.padding + this.arrowWidth + (this.ycount/10 - i)*10*this.Pixel);
+					this.canvasInstance.fillText(i * this.space ,this.padding,this.padding + this.arrowWidth + (this.ycount/this.space - i)*this.space*this.Pixel);
 				}
 			},
-			getYPixel: function(maxNum,yLength) {
-				var ycount = (parseInt(maxNum/10) + 1)*10 + 10;
-				return {pixel:yLength/ycount,ycount:ycount};
-			},//y轴的单位长度
-			getCoordY: function(yPixel,value) {
-				var y = yPixel * value;
+			getCoordY: function(ypixel,value) {
+				var y = ypixel * value;
 				return this.y0 -y
 			},//相应数据点的y坐标
 			getArc: function() {
@@ -140,8 +143,8 @@
 			getBglineY: function() {
 				this.canvasInstance.lineWidth = 1;
 				this.canvasInstance.strokeStyle = "#e8e8e8";
-				for (var i=1;i<this.ycount/10;i++) {
-					var y =this.padding + this.arrowWidth +  (this.ycount/10-i)*10*this.Pixel;
+				for (var i=1;i<this.ycount/this.space;i++) {
+					var y =this.padding + this.arrowWidth +  (this.ycount/this.space-i)*this.space*this.Pixel;
 					this.canvasInstance.moveTo(this.x0,y);
 					this.canvasInstance.lineTo(this.xArrow_x,y);
 					this.canvasInstance.stroke();
@@ -161,7 +164,6 @@
 				var mousePos = this.getMousePos(event);
 				var pagex = mousePos.x;
 				var pagey = mousePos.y;
-				console.log(mousePos)
 				for(var i=0;i<this.dataArray.length;i++) {
 					var x = this.padding + (i + 1)*this.pointWidth;
 					var y = this.getCoordY(this.Pixel,this.dataArray[i].y);
@@ -191,6 +193,15 @@
 			        x: event.clientX - rect.left * (this.cv.width / rect.width),  
 			        y: event.clientY - rect.top * (this.cv.height / rect.height)  
 			    }   
+			},
+			dataProcess: function() {
+				var ymax = (parseInt(this.maxNum/this.space)+1)*this.space;
+				return {pixel:this.yLength/ymax,ycount:ymax};
+			},
+			round: function(v,e) {
+				var t=1;
+				for(;e<0;t/=10,e++);
+				return Math.round(v*t)/t;
 			}
 	 	}
 	}

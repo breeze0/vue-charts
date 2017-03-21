@@ -23,18 +23,17 @@
 			this.maxNum = this.getMaxdataNum(this.dataArray);
 			this.ycount = this.getYPixel(this.maxNum,this.yLength).ycount;
 			this.Pixel = this.getYPixel(this.maxNum,this.yLength).pixel;
-			this.getBrokenLine(this.dataArray);
+			this.getBrokenLine();
 		},
-
 		data() {
 			return {
 				dataArray:[	{x:"周一",y:"3"},
 							{x:"周二",y:"12"},
-							{x:"周三",y:"70"},
-							{x:"周四",y:"80"},
-							{x:"周五",y:"40"},
-							{x:"周六",y:"20"},
-							{x:"周日",y:"40"}
+							{x:"周三",y:"42"},
+							{x:"周四",y:"62"},
+							{x:"周五",y:"22"},
+							{x:"周六",y:"12"},
+							{x:"周日",y:"72"}	
 						],
 				cv:null,
 				canvasInstance:null,
@@ -58,7 +57,8 @@
 		},
 
 		methods:{
-			getBrokenLine: function(dataArray) {
+			getBrokenLine: function() {
+				this.canvasInstance.beginPath();
 				//x-axis
 				this.canvasInstance.moveTo(this.x0,this.y0);
 				this.canvasInstance.lineTo(this.xArrow_x,this.xArrow_y);
@@ -87,7 +87,7 @@
 				this.y0 = this.cv.height - this.padding;//重置y0
 				this.getArc();//描点
 				//绘制broken line
-				this.canvasInstance.beginPath();//中断坐标轴和折线的连接
+				this.canvasInstance.beginPath();
 				for (var i = 0;i < this.dataArray.length; i++ ) {
 					var pointX = this.padding + (i + 1)*this.pointWidth;
 					var pointY = this.getCoordY(this.Pixel,this.dataArray[i].y)
@@ -95,7 +95,6 @@
 				}
 				this.canvasInstance.strokeStyle='red';
 				this.canvasInstance.stroke();
-				this.canvasInstance.beginPath();
 			},
 			getMaxdataNum: function(dataArray) {
 				for (var i = 0;i < this.dataArray.length;i++) {
@@ -106,14 +105,15 @@
 			getXaxis: function() {
 				for (var i = 0;i < this.dataArray.length ;i++) {
 					this.canvasInstance.textAlign = "center";
-					this.canvasInstance.fillText(this.dataArray[i].x,this.x0 +  this.pointWidth,this.y0 + this.padding);
-					this.x0 = this.x0 + this.pointWidth;
+					this.canvasInstance.fillStyle = "#000";
+					this.canvasInstance.fillText(this.dataArray[i].x,this.x0 +  this.pointWidth*(i+1),this.y0 + this.padding);
 				}
 			},
 			getYaxis: function() { 
 				for (var i = 0;i < this.ycount/10; i++) {
 					this.canvasInstance.textAlign = "right";//内容靠右
 					this.canvasInstance.textBaseline = "middle";//调整文字中心线
+					this.canvasInstance.fillStyle = "#000";
 					this.canvasInstance.fillText(i * 10 ,this.padding,this.padding + this.arrowWidth + (this.ycount/10 - i)*10*this.Pixel);
 				}
 			},
@@ -130,9 +130,9 @@
 					var x = this.padding + (i + 1)*this.pointWidth;
 					var y = this.getCoordY(this.Pixel,this.dataArray[i].y);
 					this.canvasInstance.beginPath();
-					this.canvasInstance.fillStyle="blue";
-					this.canvasInstance.strokeStyle="#fff"
-					this.canvasInstance.arc(x,y,4,0,Math.PI*2);
+					this.canvasInstance.fillStyle="red";
+					this.canvasInstance.strokeStyle="#e8e8e8"
+					this.canvasInstance.arc(x,y,5,0,Math.PI*2);
 					this.canvasInstance.stroke();
 					this.canvasInstance.fill();
 				}
@@ -161,25 +161,27 @@
 				var mousePos = this.getMousePos(event);
 				var pagex = mousePos.x;
 				var pagey = mousePos.y;
+				console.log(mousePos)
 				for(var i=0;i<this.dataArray.length;i++) {
 					var x = this.padding + (i + 1)*this.pointWidth;
 					var y = this.getCoordY(this.Pixel,this.dataArray[i].y);
-					if(pagex > x-4 && pagex <x+4 && pagey >y-4 && pagey <y+4) {
-						//this.canvasInstance.fillText(this.dataArray[i].)
+					if(pagex > x-5 && pagex <x+5 && pagey >y-5 && pagey <y+5) {
 						this.canvasInstance.beginPath();
-						this.canvasInstance.fillStyle="red";
+						this.canvasInstance.textAlign = "center";
+						this.canvasInstance.fillStyle = "#000"
+						this.canvasInstance.fillText(this.dataArray[i].y,x,y-15);
+						this.canvasInstance.beginPath();
+						this.canvasInstance.fillStyle="#000";
 						this.canvasInstance.strokeStyle="#e8e8e8"
-						this.canvasInstance.arc(x,y,4,0,Math.PI*2);
+						this.canvasInstance.arc(x,y,5,0,Math.PI*2);
 						this.canvasInstance.stroke();
 						this.canvasInstance.fill();
+						break;
 					}
 					else {
-						this.canvasInstance.beginPath();
-						this.canvasInstance.fillStyle = "blue";
-						this.canvasInstance.strokeStyle="#fff"
-						this.canvasInstance.arc(x,y,4,0,Math.PI*2);
-						this.canvasInstance.stroke();
-						this.canvasInstance.fill();
+						this.canvasInstance.clearRect(0,0,this.cv.width,this.cv.height);
+						this.cv.width = this.cv.width;//重置画布宽度，防止偏移
+						this.getBrokenLine(); 
 					}
 				}
 			},

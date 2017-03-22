@@ -17,38 +17,38 @@
       this.yArrow_y = this.padding;//y箭头y坐标
       this.xArrow_x = this.cv.width - this.padding;//x箭头x坐标
       this.xArrow_y = this.cv.height - this.padding;//x箭头y坐标
-      this.xLength = this.cv.width - 2 * this.padding - this.arrowWidth;//x轴length
-      this.yLength = this.cv.height - 2 * this.padding - this.arrowWidth;//y轴length
-      this.pointWidth = this.xLength / (this.dataArray[0].length + 1);//x轴每点间距
+      this.xLength = this.cv.width - 2*this.padding - this.arrowWidth;//x轴length
+      this.yLength = this.cv.height - 2*this.padding - this.arrowWidth;//y轴length
+      this.pointWidth = this.xLength/(this.dataArray[0].length + 1);//x轴每点间距
+      this.maxNum = this.getMaxdataNum();
+      this.minNum = this.getMindataNum();
+      this.space = this.round((this.maxNum-this.minNum)/5,-1);
+      this.ycount = this.dataProcess().ycount;
+      this.Pixel = this.dataProcess().pixel;
       this.getCoordinate(this.dataArray[0]);
       this.getBrokenLine(this.dataArray[1]);
       this.getBrokenLine(this.dataArray[0]);
     },
     data() {
       return {
-        dataArray:
-          [
-            [
-              {x:"周一",y:"33"},
-              {x:"周二",y:"43"},
-              {x:"周三",y:"32"},
-              {x:"周四",y:"62"},
-              {x:"周五",y:"52"},
-              {x:"周六",y:"25"},
-              {x:"周日",y:"32"}
-            ],
-            [
-              {x:"周一",y:"13"},
-              {x:"周二",y:"23"},
-              {x:"周三",y:"12"},
-              {x:"周四",y:"22"},
-              {x:"周五",y:"12"},
-              {x:"周六",y:"15"},
-              {x:"周日",y:"22"}
-            ]
-          ],
-        cv: null,
-        canvasInstance: null,
+        dataArray:[
+                    [{x:"周一",y:"133"},
+                     {x:"周二",y:"143"},
+                     {x:"周三",y:"232"},
+                     {x:"周四",y:"362"},
+                     {x:"周五",y:"452"},
+                     {x:"周六",y:"125"},
+                     {x:"周日",y:"232"}],
+                    [{x:"周一",y:"13"},
+                     {x:"周二",y:"23"},
+                     {x:"周三",y:"12"},
+                     {x:"周四",y:"22"},
+                     {x:"周五",y:"12"},
+                     {x:"周六",y:"15"},
+                     {x:"周日",y:"22"}]
+              ],
+        cv:null,
+        canvasInstance:null,
         padding: 20,
         x0: 0,
         y0: 0,
@@ -72,11 +72,6 @@
 
     methods:{
       getCoordinate: function(array) {
-        this.maxNum = this.getMaxdataNum(array);
-        this.minNum = this.getMindataNum();
-        this.space = this.round((this.maxNum-this.minNum) / 5, -1);
-        this.ycount = this.dataProcess().ycount;
-        this.Pixel = this.dataProcess().pixel;
         this.canvasInstance.beginPath();
         //x-axis
         this.canvasInstance.moveTo(this.x0, this.y0);
@@ -117,9 +112,11 @@
         this.canvasInstance.stroke();
         this.getArc(array);//描点
       },
-      getMaxdataNum: function(array) {
-        for (var i = 0; i < array.length; i ++) {
-          this.dataNum.push(array[i].y);
+      getMaxdataNum: function() {
+        for (var j = 0;j < this.dataArray.length;j++){
+          for (var i = 0;i < this.dataArray[j].length;i++) {
+            this.dataNum.push(this.dataArray[j][i].y);
+          }
         }
         return Math.max.apply(null, this.dataNum);
       },

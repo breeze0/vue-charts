@@ -26,8 +26,8 @@
       this.ycount = this.dataProcess().ycount;
       this.Pixel = this.dataProcess().pixel;
       this.getCoordinate(this.dataArray[0]);
-      this.getBrokenLine(this.dataArray[1]);
-      this.getBrokenLine(this.dataArray[0]);
+      this.getBrokenLine(this.dataArray[1],this.color[0]);
+      this.getBrokenLine(this.dataArray[0],this.color[2]);
     },
     data() {
       return {
@@ -62,10 +62,11 @@
         pointWidth: 0,
         dataNum:[],
         maxNum: 0,
-        minNum:0,
+        minNum: 0,
         ycount: 0,
         Pixel: 0,
-        space:0
+        space: 0,
+        color: ["yellow","green","#00FFCC"]
 
       }
     },
@@ -108,7 +109,7 @@
           var pointY = this.getCoordY(this.Pixel, array[i].y);
           this.canvasInstance.lineTo(pointX, pointY);
         }
-        this.canvasInstance.strokeStyle = "red";
+        this.canvasInstance.strokeStyle= color;
         this.canvasInstance.stroke();
         this.getArc(array);//描点
       },
@@ -147,9 +148,9 @@
           var x = this.padding + (i + 1) * this.pointWidth;
           var y = this.getCoordY(this.Pixel, array[i].y);
           this.canvasInstance.beginPath();
-          this.canvasInstance.fillStyle = "red";
-          this.canvasInstance.strokeStyle = "#e8e8e8";
-          this.canvasInstance.arc(x, y, 5, 0, Math.PI * 2);
+          this.canvasInstance.fillStyle="#AAFFEE";
+          this.canvasInstance.strokeStyle="#e8e8e8"
+          this.canvasInstance.arc(x,y,5,0,Math.PI*2);
           this.canvasInstance.stroke();
           this.canvasInstance.fill();
         }
@@ -199,8 +200,8 @@
               this.canvasInstance.clearRect(0, 0, this.cv.width, this.cv.height);
               this.cv.width = this.cv.width; //重置画布宽度，防止偏移
               this.getCoordinate(this.dataArray[0]);
-              this.getBrokenLine(this.dataArray[1]);
-              this.getBrokenLine(this.dataArray[0]);
+              this.getBrokenLine(this.dataArray[1],this.color[0]);
+              this.getBrokenLine(this.dataArray[0],this.color[2]);
             }
           }
         }

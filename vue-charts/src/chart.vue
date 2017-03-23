@@ -106,6 +106,7 @@
         this.getYaxis();
         this.y0 = this.cv.height - this.padding;//重置y0
       },
+
       getBrokenLine: function(array, color) {
         //绘制broken line
         this.canvasInstance.beginPath();
@@ -118,20 +119,42 @@
         this.canvasInstance.stroke();
         this.getArc(array);//描点
       },
+
       getkey: function() {
         this.canvasInstance.beginPath();//key1
         this.canvasInstance.fillStyle = this.color[0];
         this.canvasInstance.fillRect(this.cv.width / 2 - 20,15,40,5);
-        this.canvasInstance.beginPath()
-        this.canvasInstance.fillStyle = "#000"
-        this.canvasInstance.fillText("sanm",this.cv.width / 2 + 40,16);
+        if(this.isShowKey1) {
+          this.canvasInstance.beginPath()
+          this.canvasInstance.fillStyle = "#000";
+          this.canvasInstance.fillText("sanm",this.cv.width / 2 + 40,16);
+        } else {
+          this.canvasInstance.beginPath();
+          this.canvasInstance.fillStyle = "#CCCCCC";
+          this.canvasInstance.fillText("sanm",this.cv.width / 2 + 40,16);
+          this.canvasInstance.moveTo(this.cv.width / 2 + 20, 18);
+          this.canvasInstance.lineTo(this.cv.width /2 + 60, 18);
+          this.canvasInstance.strokeStyle = "#CCCCCC";
+          this.canvasInstance.stroke();
+        }
         this.canvasInstance.beginPath();//key2
         this.canvasInstance.fillStyle = this.color[2];
         this.canvasInstance.fillRect(this.cv.width / 2 + 80,15,40,5);
-        this.canvasInstance.beginPath();
-        this.canvasInstance.fillStyle = "#000";
-        this.canvasInstance.fillText("zhum",this.cv.width / 2 + 140,16);
+        if(this.isShowKey2) {
+         this.canvasInstance.beginPath();
+         this.canvasInstance.fillStyle = "#000";
+         this.canvasInstance.fillText("zhum",this.cv.width / 2 + 140,16);
+        } else {
+          this.canvasInstance.beginPath();
+          this.canvasInstance.fillStyle = "#CCCCCC";
+          this.canvasInstance.fillText("zhum",this.cv.width / 2 + 140,16);
+          this.canvasInstance.moveTo(this.cv.width / 2 + 120, 18);
+          this.canvasInstance.lineTo(this.cv.width /2 + 160, 18);
+          this.canvasInstance.strokeStyle = "#CCCCCC";
+          this.canvasInstance.stroke();
+        }
       },
+
       getMaxdataNum: function() {
         for (var j = 0;j < this.dataArray.length;j++){
           for (var i = 0;i < this.dataArray[j].length;i++) {
@@ -140,9 +163,11 @@
         }
         return Math.max.apply(null, this.dataNum);
       },
+
       getMindataNum: function() {
         return Math.min.apply(null, this.dataNum);
       },
+
       getXaxis: function(array) {
         for (var i = 0; i < array.length; i++) {
           this.canvasInstance.textAlign = "center";
@@ -150,6 +175,7 @@
           this.canvasInstance.fillText(array[i].x, this.x0 + this.pointWidth * (i + 1), this.y0 + 15);
         }
       },
+
       getYaxis: function() {
         for (var i = 0;i < (this.ycount - this.ymin)/this.space; i++) {
           //this.canvasInstance.textAlign = "right";//内容靠右
@@ -158,10 +184,12 @@
           this.canvasInstance.fillText(i * this.space + this.ymin,this.padding-15,this.padding + this.arrowWidth + ((this.ycount - this.ymin) / this.space - i)*this.space*this.Pixel);
         }
       },
-      getCoordY: function(ypixel,value) {
+
+      getCoordY: function(ypixel, value) {
         var y = ypixel * (value - this.ymin);
         return this.y0 -y
       },//相应数据点的y坐标
+
       getArc: function(array) {
         for (var i = 0;i < array.length; i++) {
           var x = this.padding + (i + 1) * this.pointWidth;
@@ -174,6 +202,7 @@
           this.canvasInstance.fill();
         }
       },
+
       getBglineY: function() {
         this.canvasInstance.lineWidth = 1;
         this.canvasInstance.strokeStyle = "#e8e8e8";
@@ -184,6 +213,7 @@
           this.canvasInstance.stroke();
         }
       },
+
       getBglineX: function(array) {
         this.canvasInstance.lineWidth = 1;
         this.canvasInstance.strokeStyle = "#e8e8e8";
@@ -194,6 +224,7 @@
           this.canvasInstance.stroke();
         }
       },
+
       pointHover: function(event) {
         var mousePos = this.getMousePos(event);
         var pagex = mousePos.x;
@@ -230,6 +261,7 @@
           }
         }
       },
+
       lineControl: function() {
         var mousePos = this.getMousePos(event);
         var pagex = mousePos.x;
@@ -260,6 +292,7 @@
           this.getkey();
         }
       },
+
       getMousePos: function(event) {
         var rect = this.cv.getBoundingClientRect();
         return {
@@ -267,6 +300,7 @@
               y: event.clientY - rect.top * (this.cv.height / rect.height)
           }
       },
+
       dataProcess: function() {
         var ymax = (Math.ceil(this.maxNum / this.space))*this.space + this.space;
         var ymin;
@@ -277,6 +311,7 @@
         }
         return {pixel: this.yLength / (ymax - ymin) ,ycount: ymax,ymin: ymin};
       },//单位像素和y轴最大值
+
       round: function(v,e) {
         var t = 1;
         for(;e < 0; t /= 10, e ++);

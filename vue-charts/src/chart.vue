@@ -25,31 +25,33 @@
       this.space = this.round((this.maxNum-this.minNum)/5,-1);
       this.ycount = this.dataProcess().ycount;
       this.Pixel = this.dataProcess().pixel;
+      this.ymin = this.dataProcess().ymin;
       this.getCoordinate(this.dataArray[0]);
       this.getBrokenLine(this.dataArray[1],this.color[0]);
       this.getBrokenLine(this.dataArray[0],this.color[2]);
+      this.getkey();
     },
     data() {
       return {
         dataArray:[
-                    [{x:"周一",y:"133"},
-                     {x:"周二",y:"143"},
-                     {x:"周三",y:"232"},
-                     {x:"周四",y:"362"},
-                     {x:"周五",y:"452"},
-                     {x:"周六",y:"125"},
-                     {x:"周日",y:"232"}],
-                    [{x:"周一",y:"13"},
-                     {x:"周二",y:"23"},
-                     {x:"周三",y:"12"},
-                     {x:"周四",y:"22"},
-                     {x:"周五",y:"12"},
-                     {x:"周六",y:"15"},
-                     {x:"周日",y:"22"}]
+                    [{x:"周一",y:330},
+                     {x:"周二",y:434},
+                     {x:"周三",y:302},
+                     {x:"周四",y:625},
+                     {x:"周五",y:500},
+                     {x:"周六",y:130},
+                     {x:"周日",y:520}],
+                    [{x:"周一",y:310},
+                     {x:"周二",y:-237},
+                     {x:"周三",y:176},
+                     {x:"周四",y:-326},
+                     {x:"周五",y:-524},
+                     {x:"周六",y:155},
+                     {x:"周日",y:223}]
               ],
         cv:null,
         canvasInstance:null,
-        padding: 20,
+        padding: 50,
         x0: 0,
         y0: 0,
         yArrow_x: 0,
@@ -66,7 +68,7 @@
         ycount: 0,
         Pixel: 0,
         space: 0,
-        color: ["yellow","green","#00FFCC"]
+        color: ["yellow","red","#00FFCC"]
 
       }
     },
@@ -113,6 +115,20 @@
         this.canvasInstance.stroke();
         this.getArc(array);//描点
       },
+      getkey: function() {
+        this.canvasInstance.beginPath();//key1
+        this.canvasInstance.fillStyle = this.color[0];
+        this.canvasInstance.fillRect(this.cv.width / 2 - 20,15,40,5);
+        this.canvasInstance.beginPath()
+        this.canvasInstance.fillStyle = "#000"
+        this.canvasInstance.fillText("sanm",this.cv.width / 2 + 40,16);
+        this.canvasInstance.beginPath();//key2
+        this.canvasInstance.fillStyle = this.color[2];
+        this.canvasInstance.fillRect(this.cv.width / 2 + 80,15,40,5);
+        this.canvasInstance.beginPath();
+        this.canvasInstance.fillStyle = "#000";
+        this.canvasInstance.fillText("zhum",this.cv.width / 2 + 140,16);
+      },
       getMaxdataNum: function() {
         for (var j = 0;j < this.dataArray.length;j++){
           for (var i = 0;i < this.dataArray[j].length;i++) {
@@ -132,25 +148,25 @@
         }
       },
       getYaxis: function() {
-        for (var i = 0;i < this.ycount / this.space; i ++) {
+        for (var i = 0;i < (this.ycount - this.ymin)/this.space; i++) {
           //this.canvasInstance.textAlign = "right";//内容靠右
           this.canvasInstance.textBaseline = "middle";//调整文字中心线
           this.canvasInstance.fillStyle = "#000";
-          this.canvasInstance.fillText(i * this.space, this.padding - 10,this.padding + this.arrowWidth + (this.ycount / this.space - i) * this.space * this.Pixel);
+          this.canvasInstance.fillText(i * this.space + this.ymin,this.padding-15,this.padding + this.arrowWidth + ((this.ycount - this.ymin) / this.space - i)*this.space*this.Pixel);
         }
       },
       getCoordY: function(ypixel,value) {
-        var y = ypixel * value;
-        return this.y0 - y
+        var y = ypixel * (value - this.ymin);
+        return this.y0 -y
       },//相应数据点的y坐标
       getArc: function(array) {
         for (var i = 0;i < array.length; i++) {
           var x = this.padding + (i + 1) * this.pointWidth;
           var y = this.getCoordY(this.Pixel, array[i].y);
           this.canvasInstance.beginPath();
-          this.canvasInstance.fillStyle="#AAFFEE";
+          this.canvasInstance.fillStyle="#CC99FF";
           this.canvasInstance.strokeStyle="#e8e8e8"
-          this.canvasInstance.arc(x,y,5,0,Math.PI*2);
+          this.canvasInstance.arc(x,y,4,0,Math.PI*2);
           this.canvasInstance.stroke();
           this.canvasInstance.fill();
         }
@@ -158,10 +174,10 @@
       getBglineY: function() {
         this.canvasInstance.lineWidth = 1;
         this.canvasInstance.strokeStyle = "#e8e8e8";
-        for (var i = 1; i < this.ycount / this.space; i ++) {
-          var y = this.padding + this.arrowWidth +  (this.ycount / this.space - i) * this.space * this.Pixel;
-          this.canvasInstance.moveTo(this.x0, y);
-          this.canvasInstance.lineTo(this.xArrow_x, y);
+        for (var i=1;i<(this.ycount - this.ymin)/this.space;i++) {
+          var y =this.padding + this.arrowWidth +  ((this.ycount - this.ymin)/this.space-i)*this.space*this.Pixel;
+          this.canvasInstance.moveTo(this.x0,y);
+          this.canvasInstance.lineTo(this.xArrow_x,y);
           this.canvasInstance.stroke();
         }
       },
@@ -179,20 +195,20 @@
         var mousePos = this.getMousePos(event);
         var pagex = mousePos.x;
         var pagey = mousePos.y;
-        for(var j = 0;j < this.dataArray.length; j ++) {
-          for(var i = 0;i < this.dataArray[j].length; i ++) {
-            var x = this.padding + (i + 1) * this.pointWidth;
-            var y = this.getCoordY(this.Pixel, this.dataArray[j][i].y);
-            if(pagex > x - 5 && pagex < x + 5 && pagey > y - 5 && pagey < y + 5) {
+        for(var j = 0;j<this.dataArray.length;j++) {
+          for(var i=0;i<this.dataArray[j].length;i++) {
+            var x = this.padding + (i + 1)*this.pointWidth;
+            var y = this.getCoordY(this.Pixel,this.dataArray[j][i].y);
+            if(pagex > x-4 && pagex <x+4 && pagey >y-4 && pagey <y+4) {
               this.canvasInstance.beginPath();
               this.canvasInstance.textAlign = "center";
               this.canvasInstance.fillStyle = "#000"
               this.canvasInstance.font = "italic small-caps bold 12px arial";
               this.canvasInstance.fillText(this.dataArray[j][i].y, x, y - 15);
               this.canvasInstance.beginPath();
-              this.canvasInstance.fillStyle = "#000";
-              this.canvasInstance.strokeStyle = "#e8e8e8"
-              this.canvasInstance.arc(x, y, 5, 0, Math.PI*2);
+              this.canvasInstance.fillStyle="#FF8888";
+              this.canvasInstance.strokeStyle="#e8e8e8"
+              this.canvasInstance.arc(x,y,4,0,Math.PI*2);
               this.canvasInstance.stroke();
               this.canvasInstance.fill();
               return;
@@ -202,6 +218,7 @@
               this.getCoordinate(this.dataArray[0]);
               this.getBrokenLine(this.dataArray[1],this.color[0]);
               this.getBrokenLine(this.dataArray[0],this.color[2]);
+              this.getkey();
             }
           }
         }
@@ -214,8 +231,14 @@
           }
       },
       dataProcess: function() {
-        var ymax = (Math.ceil(this.maxNum / this.space)) * this.space + this.space;
-        return {pixel: this.yLength / ymax, ycount: ymax};
+        var ymax = (Math.ceil(this.maxNum / this.space))*this.space + this.space;
+        var ymin;
+        if(this.minNum < 0 && Math.abs(this.minNum) < this.space) {
+          ymin = 0 - this.space;
+        } else {
+          ymin = (Math.floor(this.minNum / this.space))*this.space;
+        }
+        return {pixel: this.yLength / (ymax - ymin) ,ycount: ymax,ymin: ymin};
       },//单位像素和y轴最大值
       round: function(v,e) {
         var t = 1;

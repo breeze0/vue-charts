@@ -1,7 +1,8 @@
 <template>
   <div id="chart">
     <canvas id="myCanvas" width="600" height="400" style="border:1px solid #000;"
-      v-on:mousemove="pointHover">
+      v-on:mousemove="pointHover"
+      v-on:click="lineControl">
     </canvas>
   </div>
 </template>
@@ -34,20 +35,20 @@
     data() {
       return {
         dataArray:[
-                    [{x:"周一",y:330},
-                     {x:"周二",y:434},
-                     {x:"周三",y:302},
-                     {x:"周四",y:625},
-                     {x:"周五",y:500},
-                     {x:"周六",y:130},
-                     {x:"周日",y:520}],
-                    [{x:"周一",y:310},
-                     {x:"周二",y:-237},
-                     {x:"周三",y:176},
-                     {x:"周四",y:-326},
-                     {x:"周五",y:-524},
-                     {x:"周六",y:155},
-                     {x:"周日",y:223}]
+                    [{x:"first",y:30},
+                     {x:"second",y:44},
+                     {x:"third",y:30},
+                     {x:"forth",y:65},
+                     {x:"fifth",y:50},
+                     {x:"sixth",y:18},
+                     {x:"seventh",y:30}],
+                    [{x:"first",y:10},
+                     {x:"second",y:-37},
+                     {x:"third",y:76},
+                     {x:"forth",y:-26},
+                     {x:"fifth",y:-52},
+                     {x:"sixth",y:-11},
+                     {x:"seventh",y:23}]
               ],
         cv:null,
         canvasInstance:null,
@@ -68,7 +69,9 @@
         ycount: 0,
         Pixel: 0,
         space: 0,
-        color: ["yellow","red","#00FFCC"]
+        color: ["yellow","red","#00FFCC"],
+        isShowKey1: true,
+        isShowKey2: true
 
       }
     },
@@ -216,11 +219,45 @@
               this.canvasInstance.clearRect(0, 0, this.cv.width, this.cv.height);
               this.cv.width = this.cv.width; //重置画布宽度，防止偏移
               this.getCoordinate(this.dataArray[0]);
-              this.getBrokenLine(this.dataArray[1],this.color[0]);
-              this.getBrokenLine(this.dataArray[0],this.color[2]);
+              if(this.isShowKey1) {
+                this.getBrokenLine(this.dataArray[0],this.color[0]);
+              }
+              if(this.isShowKey2) {
+                this.getBrokenLine(this.dataArray[1],this.color[2]);
+              }
               this.getkey();
             }
           }
+        }
+      },
+      lineControl: function() {
+        var mousePos = this.getMousePos(event);
+        var pagex = mousePos.x;
+        var pagey = mousePos.y;
+        if(pagex > (this.cv.width / 2 - 20) && pagex < (this.cv.width / 2 + 60) && pagey > 15 && pagey < 20) {
+          this.isShowKey1 = !this.isShowKey1;
+          this.canvasInstance.clearRect(0, 0, this.cv.width, this.cv.height);
+          this.cv.width = this.cv.width; //重置画布宽度，防止偏移
+          this.getCoordinate(this.dataArray[0]);
+          if(this.isShowKey2) {
+            this.getBrokenLine(this.dataArray[0],this.color[0]);
+          }
+          if(this.isShowKey1) {
+            this.getBrokenLine(this.dataArray[1],this.color[2]);
+          }
+          this.getkey();
+        } else if(pagex > (this.cv.width / 2 + 80) && pagex < (this.cv.width / 2 + 160) && pagey > 15 && pagey < 20) {
+          this.isShowKey2 = !this.isShowKey2;
+          this.canvasInstance.clearRect(0, 0, this.cv.width, this.cv.height);
+          this.cv.width = this.cv.width; //重置画布宽度，防止偏移
+          this.getCoordinate(this.dataArray[0]);
+          if(this.isShowKey2) {
+            this.getBrokenLine(this.dataArray[0],this.color[0]);
+          }
+          if(this.isShowKey1) {
+            this.getBrokenLine(this.dataArray[1],this.color[2]);
+          }
+          this.getkey();
         }
       },
       getMousePos: function(event) {

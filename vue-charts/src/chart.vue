@@ -353,10 +353,10 @@
           this.canvasInstance.clearRect(0, 0, this.cv.width, this.cv.height);
           this.cv.width = this.cv.width; //重置画布宽度，防止偏移
           this.getCoordinate(this.dataArray[0]);
-          if(this.isShowKey2) {
+          if(this.isShowKey1) {
             this.getBrokenLine(this.dataArray[0],this.color[0]);
           }
-          if(this.isShowKey1) {
+          if(this.isShowKey2) {
             this.getBrokenLine(this.dataArray[1],this.color[2]);
           }
           this.getkey();
@@ -365,10 +365,10 @@
           this.canvasInstance.clearRect(0, 0, this.cv.width, this.cv.height);
           this.cv.width = this.cv.width; //重置画布宽度，防止偏移
           this.getCoordinate(this.dataArray[0]);
-          if(this.isShowKey2) {
+          if(this.isShowKey1) {
             this.getBrokenLine(this.dataArray[0],this.color[0]);
           }
-          if(this.isShowKey1) {
+          if(this.isShowKey2) {
             this.getBrokenLine(this.dataArray[1],this.color[2]);
           }
           this.getkey();

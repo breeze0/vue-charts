@@ -12,6 +12,7 @@
     mounted() {
       this.cv = document.getElementById('myCanvas');
       this.canvasInstance = this.cv.getContext('2d');
+      this.adaptionForRetina();
       this.x0 = this.padding;//原点x坐标
       this.y0 = this.cv.height - this.padding;//原点y坐标
       this.yArrow_x = this.padding;//y箭头X坐标
@@ -352,18 +353,20 @@
           this.isShowKey1 = !this.isShowKey1;
           this.canvasInstance.clearRect(0, 0, this.cv.width, this.cv.height);
           this.cv.width = this.cv.width; //重置画布宽度，防止偏移
+          //重绘坐标系和数据
           if(this.isShowKey1 == true) {
             this.getCoordinate(this.dataArray[0]);
           } else {
             this.getCoordinate(this.dataArray[1]);
           }
+          //重绘折线
           if(this.isShowKey1) {
             this.getBrokenLine(this.dataArray[0],this.color[0]);
           }
           if(this.isShowKey2) {
             this.getBrokenLine(this.dataArray[1],this.color[2]);
           }
-          this.getkey();
+          this.getkey();//重绘标注
         } else if(pagex > (this.cv.width / 2 + 80) && pagex < (this.cv.width / 2 + 160) && pagey > 15 && pagey < 20) {
           this.isShowKey2 = !this.isShowKey2;
           this.canvasInstance.clearRect(0, 0, this.cv.width, this.cv.height);
@@ -390,7 +393,7 @@
               y: event.clientY - rect.top * (this.cv.height / rect.height)
           }
       },
-
+      //单位像素和y轴最大值
       dataProcess: function() {
         var ymax = (Math.ceil(this.maxNum / this.space))*this.space + this.space;
         var ymin;
@@ -400,13 +403,23 @@
           ymin = (Math.floor(this.minNum / this.space))*this.space;
         }
         return {pixel: this.yLength / (ymax - ymin) ,ycount: ymax,ymin: ymin};
-      },//单位像素和y轴最大值
-
+      },
+      //对指定位四舍五入
       round: function(v,e) {
         var t = 1;
         for(;e < 0; t /= 10, e ++);
         return Math.round(v * t) / t;
-      }//对指定位四舍五入
+      },
+
+      adaptionForRetina: function() {
+        var devicePixelRatio = window.devicePixelRatio || 1;//屏幕的设备像素比
+        var backingStoreRatio = 1;
+        var ratio = devicePixelRatio / backingStoreRatio;
+        this.cv.style.width = this.cv.width + 'px';
+        this.cv.style.height = this.cv.height + 'px';
+        this.cv.width *= ratio;
+        this.cv.height *= ratio;
+      }
     }
   }
 </script>

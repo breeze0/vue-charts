@@ -21,15 +21,15 @@
       this.xLength = this.cv.width - 2*this.padding - this.arrowWidth;//x轴length
       this.yLength = this.cv.height - 2*this.padding - this.arrowWidth;//y轴length
       this.pointWidth = this.xLength/(this.dataArray[0].length + 1);//x轴每点间距
-      this.maxNum = this.getMaxdataNum();
-      this.minNum = this.getMindataNum();
+      this.maxNum = this.getDataNum().max;
+      this.minNum = this.getDataNum().min;
       this.space = this.round((this.maxNum-this.minNum)/5,-1);
       this.ycount = this.dataProcess().ycount;
       this.Pixel = this.dataProcess().pixel;
       this.ymin = this.dataProcess().ymin;
       this.getCoordinate(this.dataArray[0]);
-      this.getBrokenLine(this.dataArray[1],this.color[0]);
-      this.getBrokenLine(this.dataArray[0],this.color[2]);
+      this.getBrokenLine(this.dataArray[0],this.color[0]);
+      this.getBrokenLine(this.dataArray[1],this.color[2]);
       this.getkey();
     },
     data() {
@@ -38,16 +38,16 @@
                     [{x:"first",y:30},
                      {x:"second",y:44},
                      {x:"third",y:30},
-                     {x:"forth",y:65},
-                     {x:"fifth",y:50},
+                     {x:"forth",y:25},
+                     {x:"fifth",y:3},
                      {x:"sixth",y:18},
                      {x:"seventh",y:30}],
                     [{x:"first",y:10},
-                     {x:"second",y:-37},
-                     {x:"third",y:76},
-                     {x:"forth",y:-26},
-                     {x:"fifth",y:-52},
-                     {x:"sixth",y:-11},
+                     {x:"second",y:-17},
+                     {x:"third",y:66},
+                     {x:"forth",y:-16},
+                     {x:"fifth",y:-12},
+                     {x:"sixth",y:-10},
                      {x:"seventh",y:23}]
               ],
         cv:null,
@@ -63,7 +63,7 @@
         xLength: 0,
         yLength: 0,
         pointWidth: 0,
-        dataNum:[],
+        //dataNum:[],
         maxNum: 0,
         minNum: 0,
         ycount: 0,
@@ -76,7 +76,26 @@
       }
     },
 
-    methods:{
+    watch: {
+      isShowKey1: function() {
+        this.maxNum = this.getDataNum().max;
+        this.minNum = this.getDataNum().min;
+        this.space = this.round((this.maxNum-this.minNum)/5,-1);
+        this.ycount = this.dataProcess().ycount;
+        this.Pixel = this.dataProcess().pixel;
+        this.ymin = this.dataProcess().ymin;
+      },
+      isShowKey2: function() {
+        this.maxNum = this.getDataNum().max;
+        this.minNum = this.getDataNum().min;
+        this.space = this.round((this.maxNum-this.minNum)/5,-1);
+        this.ycount = this.dataProcess().ycount;
+        this.Pixel = this.dataProcess().pixel;
+        this.ymin = this.dataProcess().ymin;
+      }
+    },
+
+    methods: {
       getCoordinate: function(array) {
         this.canvasInstance.beginPath();
         //x-axis
@@ -155,17 +174,28 @@
         }
       },
 
-      getMaxdataNum: function() {
-        for (var j = 0;j < this.dataArray.length;j++){
-          for (var i = 0;i < this.dataArray[j].length;i++) {
-            this.dataNum.push(this.dataArray[j][i].y);
+      getDataNum: function() {
+        if(this.isShowKey1 == true && this.isShowKey2 == false) {
+          var dataNum = [];
+          for(var i = 0;i < this.dataArray[0].length;i++) {
+            dataNum.push(this.dataArray[0][i].y);
           }
-        }
-        return Math.max.apply(null, this.dataNum);
-      },
-
-      getMindataNum: function() {
-        return Math.min.apply(null, this.dataNum);
+          return {max: Math.max.apply(null, dataNum),min: Math.min.apply(null, dataNum)};
+        } else if(this.isShowKey1 == false && this.isShowKey2 == true) {
+          var dataNum = [];
+          for(var i = 0;i < this.dataArray[1].length;i++) {
+            dataNum.push(this.dataArray[1][i].y);
+          }
+          return {max: Math.max.apply(null, dataNum),min: Math.min.apply(null, dataNum)};
+        } else {
+            var dataNum = [];
+            for (var j = 0;j < this.dataArray.length;j++){
+              for (var i = 0;i < this.dataArray[j].length;i++) {
+                dataNum.push(this.dataArray[j][i].y);
+              }
+            }
+          return {max: Math.max.apply(null, dataNum),min: Math.min.apply(null, dataNum)};
+          }
       },
 
       getXaxis: function(array) {
@@ -229,16 +259,48 @@
         var mousePos = this.getMousePos(event);
         var pagex = mousePos.x;
         var pagey = mousePos.y;
-        for(var j = 0;j<this.dataArray.length;j++) {
-          for(var i=0;i<this.dataArray[j].length;i++) {
+        if(this.isShowKey1 == true && this.isShowKey2 == true) {
+          for(var j = 0;j<this.dataArray.length;j++) {
+            for(var i=0;i<this.dataArray[j].length;i++) {
+              var x = this.padding + (i + 1)*this.pointWidth;
+              var y = this.getCoordY(this.Pixel,this.dataArray[j][i].y);
+              if(pagex > x-4 && pagex <x+4 && pagey >y-4 && pagey <y+4) {
+                this.canvasInstance.beginPath();
+                this.canvasInstance.textAlign = "center";
+                this.canvasInstance.fillStyle = "#000"
+                this.canvasInstance.font = "italic small-caps bold 12px arial";
+                this.canvasInstance.fillText(this.dataArray[j][i].y, x, y - 15);
+                this.canvasInstance.beginPath();
+                this.canvasInstance.fillStyle="#FF8888";
+                this.canvasInstance.strokeStyle="#e8e8e8"
+                this.canvasInstance.arc(x,y,4,0,Math.PI*2);
+                this.canvasInstance.stroke();
+                this.canvasInstance.fill();
+                return;
+              } else {
+                this.canvasInstance.clearRect(0, 0, this.cv.width, this.cv.height);
+                this.cv.width = this.cv.width; //重置画布宽度，防止偏移
+                this.getCoordinate(this.dataArray[0]);
+                if(this.isShowKey1) {
+                  this.getBrokenLine(this.dataArray[0],this.color[0]);
+                }
+                if(this.isShowKey2) {
+                  this.getBrokenLine(this.dataArray[1],this.color[2]);
+                }
+                this.getkey();
+              }
+            }
+          }
+        } else if(this.isShowKey1 == true && this.isShowKey2 == false) {
+          for(var i=0;i<this.dataArray[0].length;i++) {
             var x = this.padding + (i + 1)*this.pointWidth;
-            var y = this.getCoordY(this.Pixel,this.dataArray[j][i].y);
+            var y = this.getCoordY(this.Pixel,this.dataArray[0][i].y);
             if(pagex > x-4 && pagex <x+4 && pagey >y-4 && pagey <y+4) {
               this.canvasInstance.beginPath();
               this.canvasInstance.textAlign = "center";
               this.canvasInstance.fillStyle = "#000"
               this.canvasInstance.font = "italic small-caps bold 12px arial";
-              this.canvasInstance.fillText(this.dataArray[j][i].y, x, y - 15);
+              this.canvasInstance.fillText(this.dataArray[0][i].y, x, y - 15);
               this.canvasInstance.beginPath();
               this.canvasInstance.fillStyle="#FF8888";
               this.canvasInstance.strokeStyle="#e8e8e8"
@@ -250,12 +312,32 @@
               this.canvasInstance.clearRect(0, 0, this.cv.width, this.cv.height);
               this.cv.width = this.cv.width; //重置画布宽度，防止偏移
               this.getCoordinate(this.dataArray[0]);
-              if(this.isShowKey1) {
-                this.getBrokenLine(this.dataArray[0],this.color[0]);
-              }
-              if(this.isShowKey2) {
-                this.getBrokenLine(this.dataArray[1],this.color[2]);
-              }
+              this.getBrokenLine(this.dataArray[0],this.color[0]);
+              this.getkey();
+            }
+          }
+        } else if(this.isShowKey1 == false && this.isShowKey2 == true) {
+          for(var i=0;i<this.dataArray[1].length;i++) {
+            var x = this.padding + (i + 1)*this.pointWidth;
+            var y = this.getCoordY(this.Pixel,this.dataArray[1][i].y);
+            if(pagex > x-4 && pagex <x+4 && pagey >y-4 && pagey <y+4) {
+              this.canvasInstance.beginPath();
+              this.canvasInstance.textAlign = "center";
+              this.canvasInstance.fillStyle = "#000"
+              this.canvasInstance.font = "italic small-caps bold 12px arial";
+              this.canvasInstance.fillText(this.dataArray[1][i].y, x, y - 15);
+              this.canvasInstance.beginPath();
+              this.canvasInstance.fillStyle="#FF8888";
+              this.canvasInstance.strokeStyle="#e8e8e8"
+              this.canvasInstance.arc(x,y,4,0,Math.PI*2);
+              this.canvasInstance.stroke();
+              this.canvasInstance.fill();
+              return;
+            } else {
+              this.canvasInstance.clearRect(0, 0, this.cv.width, this.cv.height);
+              this.cv.width = this.cv.width; //重置画布宽度，防止偏移
+              this.getCoordinate(this.dataArray[0]);
+              this.getBrokenLine(this.dataArray[1],this.color[2]);
               this.getkey();
             }
           }

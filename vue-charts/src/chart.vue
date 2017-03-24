@@ -352,7 +352,11 @@
           this.isShowKey1 = !this.isShowKey1;
           this.canvasInstance.clearRect(0, 0, this.cv.width, this.cv.height);
           this.cv.width = this.cv.width; //重置画布宽度，防止偏移
-          this.getCoordinate(this.dataArray[0]);
+          if(this.isShowKey1 == true) {
+            this.getCoordinate(this.dataArray[0]);
+          } else {
+            this.getCoordinate(this.dataArray[1]);
+          }
           if(this.isShowKey1) {
             this.getBrokenLine(this.dataArray[0],this.color[0]);
           }
@@ -364,7 +368,11 @@
           this.isShowKey2 = !this.isShowKey2;
           this.canvasInstance.clearRect(0, 0, this.cv.width, this.cv.height);
           this.cv.width = this.cv.width; //重置画布宽度，防止偏移
-          this.getCoordinate(this.dataArray[0]);
+          if(this.isShowKey2 == true) {
+            this.getCoordinate(this.dataArray[1]);
+          } else {
+            this.getCoordinate(this.dataArray[0]);
+          }
           if(this.isShowKey1) {
             this.getBrokenLine(this.dataArray[0],this.color[0]);
           }

@@ -8,7 +8,7 @@ Vue.config.productionTip = false
 
 /* eslint-disable no-new */
 new Vue({
-  el: '#chart',
+  el: '#line',
   router,
   template: '<chart/>',
   components: { chart }

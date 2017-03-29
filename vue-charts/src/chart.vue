@@ -1,5 +1,5 @@
 <template>
-  <div id="chart">
+  <div id="line">
     <canvas id="myCanvas" width="600" height="400" style="border:1px solid #000;"
       v-on:mousemove="pointHover"
       v-on:click="lineControl">
@@ -12,25 +12,18 @@
     mounted() {
       this.cv = document.getElementById('myCanvas');
       this.canvasInstance = this.cv.getContext('2d');
-      this.adaptionForRetina();
-      this.x0 = this.padding;//原点x坐标
-      this.y0 = this.cv.height - this.padding;//原点y坐标
-      this.yArrow_x = this.padding;//y箭头X坐标
-      this.yArrow_y = this.padding;//y箭头y坐标
-      this.xArrow_x = this.cv.width - this.padding;//x箭头x坐标
-      this.xArrow_y = this.cv.height - this.padding;//x箭头y坐标
-      this.xLength = this.cv.width - 2*this.padding - this.arrowWidth;//x轴length
-      this.yLength = this.cv.height - 2*this.padding - this.arrowWidth;//y轴length
-      this.pointWidth = this.xLength/(this.dataArray[0].length + 1);//x轴每点间距
+      //this.canvasInstance.lineWidth = 2;
+      this.getRatio();
+      this.getCoordinateData();
       this.maxNum = this.getDataNum().max;
       this.minNum = this.getDataNum().min;
       this.space = this.round((this.maxNum-this.minNum)/5,-1);
       this.ycount = this.dataProcess().ycount;
       this.Pixel = this.dataProcess().pixel;
       this.ymin = this.dataProcess().ymin;
-      this.getCoordinate(this.dataArray[0]);
+      this.getCoordinate();
       this.getBrokenLine(this.dataArray[0],this.color[0]);
-      this.getBrokenLine(this.dataArray[1],this.color[2]);
+      this.getBrokenLine(this.dataArray[1],this.color[1]);
       this.getkey();
     },
     data() {
@@ -64,15 +57,17 @@
         xLength: 0,
         yLength: 0,
         pointWidth: 0,
-        //dataNum:[],
+        numData:[],
         maxNum: 0,
         minNum: 0,
         ycount: 0,
         Pixel: 0,
         space: 0,
-        color: ["yellow","red","#00FFCC"],
+        color: ["yellow","#00FFCC","red"],
         isShowKey1: true,
-        isShowKey2: true
+        isShowKey2: true,
+        ratio: 1,
+        isMultiData: false
 
       }
     },
@@ -97,7 +92,41 @@
     },
 
     methods: {
-      getCoordinate: function(array) {
+      getRatio: function() {
+        var devicePixelRatio = window.devicePixelRatio || 1;//屏幕的设备像素比
+        var backingStoreRatio = this.canvasInstance.webkitBackingStorePixelRatio ||
+                                this.canvasInstance.mozBackingStorePixelRatio ||
+                                this.canvasInstance.msBackingStorePixelRatio ||
+                                this.canvasInstance.oBackingStorePixelRatio ||
+                                this.canvasInstance.backingStorePixelRatio || 1;
+        this.ratio = devicePixelRatio / backingStoreRatio;
+        this.cv.style.width = this.cv.width + 'px';
+        this.cv.style.height = this.cv.height + 'px';
+        this.cv.width *= this.ratio;
+        this.cv.height *= this.ratio;
+      },
+
+      isMultiLine: function() {
+        if(this.dataArray.length > 1) {
+          this.isMultiData = true;
+        }
+      },
+
+      getCoordinateData: function() {
+        this.arrowWidth = this.arrowWidth * this.ratio;
+        this.padding = this.padding * this.ratio;
+        this.x0 = this.padding;//原点x坐标
+        this.y0 = this.cv.height - this.padding;//原点y坐标
+        this.yArrow_x = this.padding;//y箭头X坐标
+        this.yArrow_y = this.padding;//y箭头y坐标
+        this.xArrow_x = this.cv.width - this.padding;//x箭头x坐标
+        this.xArrow_y = this.cv.height - this.padding;//x箭头y坐标
+        this.xLength = this.cv.width - 2*this.padding - this.arrowWidth;//x轴length
+        this.yLength = this.cv.height - 2*this.padding - this.arrowWidth;//y轴length
+        this.pointWidth = this.xLength/(this.dataArray[0].length + 1);//x轴每点间距
+      },
+
+      getCoordinate: function() {
         this.canvasInstance.beginPath();
         //x-axis
         this.canvasInstance.moveTo(this.x0, this.y0);
@@ -118,16 +147,16 @@
         this.canvasInstance.beginPath();
         this.getBglineY();
         this.canvasInstance.beginPath();
-        this.getBglineX(array);
+        this.getBglineX();
         //绘制X轴数据
-        this.getXaxis(array);
+        this.getXaxis();
         this.x0 = this.padding;//重置x0
         //绘制Y轴数据
         this.getYaxis();
         this.y0 = this.cv.height - this.padding;//重置y0
       },
 
-      getBrokenLine: function(array, color) {
+      getBrokenLine: function(array,color) {
         //绘制broken line
         this.canvasInstance.beginPath();
         for (var i = 0; i < array.length; i ++ ) {
@@ -143,33 +172,33 @@
       getkey: function() {
         this.canvasInstance.beginPath();//key1
         this.canvasInstance.fillStyle = this.color[0];
-        this.canvasInstance.fillRect(this.cv.width / 2 - 20,15,40,5);
+        this.canvasInstance.fillRect(this.cv.width / 2 - 20 * this.ratio,15 * this.ratio,40 * this.ratio,5 * this.ratio);
         if(this.isShowKey1) {
           this.canvasInstance.beginPath()
           this.canvasInstance.fillStyle = "#000";
-          this.canvasInstance.fillText("sanm",this.cv.width / 2 + 40,16);
+          this.canvasInstance.fillText("sanm",this.cv.width / 2 + 40 * this.ratio,16 * this.ratio);
         } else {
           this.canvasInstance.beginPath();
           this.canvasInstance.fillStyle = "#CCCCCC";
-          this.canvasInstance.fillText("sanm",this.cv.width / 2 + 40,16);
-          this.canvasInstance.moveTo(this.cv.width / 2 + 20, 18);
-          this.canvasInstance.lineTo(this.cv.width /2 + 60, 18);
+          this.canvasInstance.fillText("sanm",this.cv.width / 2 + 40 * this.ratio,16 * this.ratio);
+          this.canvasInstance.moveTo(this.cv.width / 2 + 20 * this.ratio, 18 * this.ratio);
+          this.canvasInstance.lineTo(this.cv.width /2 + 60 * this.ratio, 18 * this.ratio);
           this.canvasInstance.strokeStyle = "#CCCCCC";
           this.canvasInstance.stroke();
         }
         this.canvasInstance.beginPath();//key2
-        this.canvasInstance.fillStyle = this.color[2];
-        this.canvasInstance.fillRect(this.cv.width / 2 + 80,15,40,5);
+        this.canvasInstance.fillStyle = this.color[1];
+        this.canvasInstance.fillRect(this.cv.width / 2 + 80 * this.ratio,15 * this.ratio,40 * this.ratio,5 * this.ratio);
         if(this.isShowKey2) {
          this.canvasInstance.beginPath();
          this.canvasInstance.fillStyle = "#000";
-         this.canvasInstance.fillText("zhum",this.cv.width / 2 + 140,16);
+         this.canvasInstance.fillText("zhum",this.cv.width / 2 + 140 * this.ratio,16 * this.ratio);
         } else {
           this.canvasInstance.beginPath();
           this.canvasInstance.fillStyle = "#CCCCCC";
-          this.canvasInstance.fillText("zhum",this.cv.width / 2 + 140,16);
-          this.canvasInstance.moveTo(this.cv.width / 2 + 120, 18);
-          this.canvasInstance.lineTo(this.cv.width /2 + 160, 18);
+          this.canvasInstance.fillText("zhum",this.cv.width / 2 + 140 * this.ratio,16 * this.ratio);
+          this.canvasInstance.moveTo(this.cv.width / 2 + 120 * this.ratio, 18 * this.ratio);
+          this.canvasInstance.lineTo(this.cv.width /2 + 160 * this.ratio, 18 * this.ratio);
           this.canvasInstance.strokeStyle = "#CCCCCC";
           this.canvasInstance.stroke();
         }
@@ -195,15 +224,19 @@
                 dataNum.push(this.dataArray[j][i].y);
               }
             }
+            this.numData = dataNum;
           return {max: Math.max.apply(null, dataNum),min: Math.min.apply(null, dataNum)};
           }
       },
 
-      getXaxis: function(array) {
-        for (var i = 0; i < array.length; i++) {
+      getXaxis: function() {
+        for (var i = 0; i < this.dataArray[0].length; i++) {
           this.canvasInstance.textAlign = "center";
           this.canvasInstance.fillStyle = "#000";
-          this.canvasInstance.fillText(array[i].x, this.x0 + this.pointWidth * (i + 1), this.y0 + 15);
+          if(this.ratio > 1) {
+            this.canvasInstance.font = "24px arial";
+          }
+          this.canvasInstance.fillText(this.dataArray[0][i].x, this.x0 + this.pointWidth * (i + 1), this.y0 + 15 * this.ratio);
         }
       },
 
@@ -212,7 +245,7 @@
           //this.canvasInstance.textAlign = "right";//内容靠右
           this.canvasInstance.textBaseline = "middle";//调整文字中心线
           this.canvasInstance.fillStyle = "#000";
-          this.canvasInstance.fillText(i * this.space + this.ymin,this.padding-15,this.padding + this.arrowWidth + ((this.ycount - this.ymin) / this.space - i)*this.space*this.Pixel);
+          this.canvasInstance.fillText(i * this.space + this.ymin,this.padding-15*this.ratio,this.padding + this.arrowWidth + ((this.ycount - this.ymin) / this.space - i)*this.space*this.Pixel);
         }
       },
 
@@ -228,14 +261,14 @@
           this.canvasInstance.beginPath();
           this.canvasInstance.fillStyle="#CC99FF";
           this.canvasInstance.strokeStyle="#e8e8e8"
-          this.canvasInstance.arc(x,y,4,0,Math.PI*2);
+          this.canvasInstance.arc(x,y,4 * this.ratio,0,Math.PI*2);
           this.canvasInstance.stroke();
           this.canvasInstance.fill();
         }
       },
 
       getBglineY: function() {
-        this.canvasInstance.lineWidth = 1;
+        //this.canvasInstance.lineWidth = 1;
         this.canvasInstance.strokeStyle = "#e8e8e8";
         for (var i=1;i<(this.ycount - this.ymin)/this.space;i++) {
           var y =this.padding + this.arrowWidth +  ((this.ycount - this.ymin)/this.space-i)*this.space*this.Pixel;
@@ -245,10 +278,10 @@
         }
       },
 
-      getBglineX: function(array) {
-        this.canvasInstance.lineWidth = 1;
+      getBglineX: function() {
+        //this.canvasInstance.lineWidth = 1;
         this.canvasInstance.strokeStyle = "#e8e8e8";
-        for (var i = 1; i < array.length + 1; i ++) {
+        for (var i = 1; i < this.dataArray[0].length + 1; i ++) {
           var x = this.padding + this.pointWidth * i;
           this.canvasInstance.moveTo(x,this.y0);
           this.canvasInstance.lineTo(x,this.yArrow_y);
@@ -258,36 +291,32 @@
 
       pointHover: function(event) {
         var mousePos = this.getMousePos(event);
-        var pagex = mousePos.x;
-        var pagey = mousePos.y;
+        var pagex = mousePos.x * this.ratio;
+        var pagey = mousePos.y * this.ratio;
+        console.log(mousePos)
         if(this.isShowKey1 == true && this.isShowKey2 == true) {
           for(var j = 0;j<this.dataArray.length;j++) {
             for(var i=0;i<this.dataArray[j].length;i++) {
               var x = this.padding + (i + 1)*this.pointWidth;
               var y = this.getCoordY(this.Pixel,this.dataArray[j][i].y);
-              if(pagex > x-4 && pagex <x+4 && pagey >y-4 && pagey <y+4) {
+              if(pagex > x-4 * this.ratio && pagex <x+4 * this.ratio && pagey >y-4 * this.ratio && pagey <y+4 * this.ratio) {
                 this.canvasInstance.beginPath();
                 this.canvasInstance.textAlign = "center";
                 this.canvasInstance.fillStyle = "#000"
-                this.canvasInstance.font = "italic small-caps bold 12px arial";
-                this.canvasInstance.fillText(this.dataArray[j][i].y, x, y - 15);
+                this.canvasInstance.fillText(this.dataArray[j][i].y, x, y - 15 * this.ratio);
                 this.canvasInstance.beginPath();
                 this.canvasInstance.fillStyle="#FF8888";
                 this.canvasInstance.strokeStyle="#e8e8e8"
-                this.canvasInstance.arc(x,y,4,0,Math.PI*2);
+                this.canvasInstance.arc(x,y,4 * this.ratio,0,Math.PI*2);
                 this.canvasInstance.stroke();
                 this.canvasInstance.fill();
                 return;
               } else {
                 this.canvasInstance.clearRect(0, 0, this.cv.width, this.cv.height);
                 this.cv.width = this.cv.width; //重置画布宽度，防止偏移
-                this.getCoordinate(this.dataArray[0]);
-                if(this.isShowKey1) {
-                  this.getBrokenLine(this.dataArray[0],this.color[0]);
-                }
-                if(this.isShowKey2) {
-                  this.getBrokenLine(this.dataArray[1],this.color[2]);
-                }
+                this.getCoordinate();
+                this.getBrokenLine(this.dataArray[0],this.color[0]);
+                this.getBrokenLine(this.dataArray[1],this.color[1]);
                 this.getkey();
               }
             }
@@ -296,23 +325,22 @@
           for(var i=0;i<this.dataArray[0].length;i++) {
             var x = this.padding + (i + 1)*this.pointWidth;
             var y = this.getCoordY(this.Pixel,this.dataArray[0][i].y);
-            if(pagex > x-4 && pagex <x+4 && pagey >y-4 && pagey <y+4) {
+            if(pagex > x-4 * this.ratio && pagex <x+4 * this.ratio && pagey >y-4 * this.ratio && pagey <y+4 * this.ratio) {
               this.canvasInstance.beginPath();
               this.canvasInstance.textAlign = "center";
               this.canvasInstance.fillStyle = "#000"
-              this.canvasInstance.font = "italic small-caps bold 12px arial";
-              this.canvasInstance.fillText(this.dataArray[0][i].y, x, y - 15);
+              this.canvasInstance.fillText(this.dataArray[0][i].y, x, y - 15 * this.ratio);
               this.canvasInstance.beginPath();
               this.canvasInstance.fillStyle="#FF8888";
               this.canvasInstance.strokeStyle="#e8e8e8"
-              this.canvasInstance.arc(x,y,4,0,Math.PI*2);
+              this.canvasInstance.arc(x,y,4 * this.ratio,0,Math.PI*2);
               this.canvasInstance.stroke();
               this.canvasInstance.fill();
               return;
             } else {
               this.canvasInstance.clearRect(0, 0, this.cv.width, this.cv.height);
               this.cv.width = this.cv.width; //重置画布宽度，防止偏移
-              this.getCoordinate(this.dataArray[0]);
+              this.getCoordinate();
               this.getBrokenLine(this.dataArray[0],this.color[0]);
               this.getkey();
             }
@@ -321,24 +349,23 @@
           for(var i=0;i<this.dataArray[1].length;i++) {
             var x = this.padding + (i + 1)*this.pointWidth;
             var y = this.getCoordY(this.Pixel,this.dataArray[1][i].y);
-            if(pagex > x-4 && pagex <x+4 && pagey >y-4 && pagey <y+4) {
+            if(pagex > x-4 * this.ratio && pagex <x+4 * this.ratio && pagey >y-4 * this.ratio && pagey <y+4 * this.ratio) {
               this.canvasInstance.beginPath();
               this.canvasInstance.textAlign = "center";
               this.canvasInstance.fillStyle = "#000"
-              this.canvasInstance.font = "italic small-caps bold 12px arial";
-              this.canvasInstance.fillText(this.dataArray[1][i].y, x, y - 15);
+              this.canvasInstance.fillText(this.dataArray[1][i].y, x, y - 15 * this.ratio);
               this.canvasInstance.beginPath();
               this.canvasInstance.fillStyle="#FF8888";
               this.canvasInstance.strokeStyle="#e8e8e8"
-              this.canvasInstance.arc(x,y,4,0,Math.PI*2);
+              this.canvasInstance.arc(x,y,4 * this.ratio,0,Math.PI*2);
               this.canvasInstance.stroke();
               this.canvasInstance.fill();
               return;
             } else {
               this.canvasInstance.clearRect(0, 0, this.cv.width, this.cv.height);
               this.cv.width = this.cv.width; //重置画布宽度，防止偏移
-              this.getCoordinate(this.dataArray[0]);
-              this.getBrokenLine(this.dataArray[1],this.color[2]);
+              this.getCoordinate();
+              this.getBrokenLine(this.dataArray[1],this.color[1]);
               this.getkey();
             }
           }
@@ -347,40 +374,32 @@
 
       lineControl: function() {
         var mousePos = this.getMousePos(event);
-        var pagex = mousePos.x;
-        var pagey = mousePos.y;
-        if(pagex > (this.cv.width / 2 - 20) && pagex < (this.cv.width / 2 + 60) && pagey > 15 && pagey < 20) {
+        var pagex = mousePos.x * this.ratio;
+        var pagey = mousePos.y * this.ratio;
+        if(pagex > (this.cv.width / 2 - 20 * this.ratio) && pagex < (this.cv.width / 2 + 60 * this.ratio) && pagey > 15 * this.ratio && pagey < 20 * this.ratio) {
           this.isShowKey1 = !this.isShowKey1;
           this.canvasInstance.clearRect(0, 0, this.cv.width, this.cv.height);
           this.cv.width = this.cv.width; //重置画布宽度，防止偏移
           //重绘坐标系和数据
-          if(this.isShowKey1 == true) {
-            this.getCoordinate(this.dataArray[0]);
-          } else {
-            this.getCoordinate(this.dataArray[1]);
-          }
+          this.getCoordinate();
           //重绘折线
           if(this.isShowKey1) {
             this.getBrokenLine(this.dataArray[0],this.color[0]);
           }
           if(this.isShowKey2) {
-            this.getBrokenLine(this.dataArray[1],this.color[2]);
+            this.getBrokenLine(this.dataArray[1],this.color[1]);
           }
           this.getkey();//重绘标注
-        } else if(pagex > (this.cv.width / 2 + 80) && pagex < (this.cv.width / 2 + 160) && pagey > 15 && pagey < 20) {
+        } else if(pagex > (this.cv.width / 2 + 80 * this.ratio) && pagex < (this.cv.width / 2 + 160 * this.ratio) && pagey > 15 * this.ratio && pagey < 20 * this.ratio) {
           this.isShowKey2 = !this.isShowKey2;
           this.canvasInstance.clearRect(0, 0, this.cv.width, this.cv.height);
           this.cv.width = this.cv.width; //重置画布宽度，防止偏移
-          if(this.isShowKey2 == true) {
-            this.getCoordinate(this.dataArray[1]);
-          } else {
-            this.getCoordinate(this.dataArray[0]);
-          }
+          this.getCoordinate();
           if(this.isShowKey1) {
             this.getBrokenLine(this.dataArray[0],this.color[0]);
           }
           if(this.isShowKey2) {
-            this.getBrokenLine(this.dataArray[1],this.color[2]);
+            this.getBrokenLine(this.dataArray[1],this.color[1]);
           }
           this.getkey();
         }
@@ -389,8 +408,8 @@
       getMousePos: function(event) {
         var rect = this.cv.getBoundingClientRect();
         return {
-              x: event.clientX - rect.left * (this.cv.width / rect.width),
-              y: event.clientY - rect.top * (this.cv.height / rect.height)
+              x: event.clientX - rect.left,
+              y: event.clientY - rect.top
           }
       },
       //单位像素和y轴最大值
@@ -409,16 +428,6 @@
         var t = 1;
         for(;e < 0; t /= 10, e ++);
         return Math.round(v * t) / t;
-      },
-
-      adaptionForRetina: function() {
-        var devicePixelRatio = window.devicePixelRatio || 1;//屏幕的设备像素比
-        var backingStoreRatio = 1;
-        var ratio = devicePixelRatio / backingStoreRatio;
-        this.cv.style.width = this.cv.width + 'px';
-        this.cv.style.height = this.cv.height + 'px';
-        this.cv.width *= ratio;
-        this.cv.height *= ratio;
       }
     }
   }
